@@ -7,88 +7,90 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Background Canvas for Fireworks & Particles -->
-    <canvas id="bg-canvas"></canvas>
-    <div class="glow-orb"></div>
+    <!-- Background Elements -->
+    <div id="bg-glow"></div>
+    <canvas id="fireworks-canvas"></canvas>
+    <div id="hearts-container"></div>
 
-    <!-- Music Control -->
-    <button id="music-toggle" title="Toggle Music">
-        <span id="music-icon">🔇</span>
-    </button>
-    <audio id="bg-music" loop>
-        <source src="music.mp3" type="audio/mpeg">
-    </audio>
-
-    <!-- 1. Intro Screen -->
-    <section id="intro-screen" class="screen">
-        <div class="intro-text">
-            <h1>Tonight is not just a night ✨</h1>
-            <p>Something magical is waiting...</p>
-            <button id="start-btn" class="btn-romantic">Tap to Begin 💖</button>
+    <!-- Intro Screen -->
+    <section id="intro-screen" class="active">
+        <div class="content">
+            <h1 class="fade-in">Tonight is not just a night ✨</h1>
+            <p class="fade-in delay-1">Something magical is waiting...</p>
+            <button id="start-btn" class="fade-in delay-2">Tap to Begin 💖</button>
         </div>
     </section>
 
-    <!-- 2. Story Screen -->
-    <section id="story-screen" class="screen hidden">
+    <!-- Story Slider -->
+    <section id="story-slider">
         <div class="slider-container">
-            <div class="slide active" data-title="How It Started 💫">
-                <img src="photo1.jpg" alt="Slide 1">
-                <div class="slide-content">
-                    <h2 class="slide-title">How It Started 💫</h2>
-                </div>
+            <div class="slide active" data-index="0">
+                <img src="photo1.jpg" alt="How It Started" onerror="this.src='https://picsum.photos/seed/love1/800/1000'">
+                <div class="slide-text">How It Started 💫</div>
             </div>
-            <div class="slide" data-title="Beautiful Moments 🌸">
-                <img src="photo2.jpg" alt="Slide 2">
-                <div class="slide-content">
-                    <h2 class="slide-title">Beautiful Moments 🌸</h2>
-                </div>
+            <div class="slide" data-index="1">
+                <img src="photo2.jpg" alt="Beautiful Moments" onerror="this.src='https://picsum.photos/seed/love2/800/1000'">
+                <div class="slide-text">Beautiful Moments 🌸</div>
             </div>
-            <div class="slide" data-title="You Are My Happiness ❤️">
-                <img src="photo3.jpg" alt="Slide 3">
-                <div class="slide-content">
-                    <h2 class="slide-title">You Are My Happiness ❤️</h2>
-                </div>
+            <div class="slide" data-index="2">
+                <img src="photo3.jpg" alt="You Are My Happiness" onerror="this.src='https://picsum.photos/seed/love3/800/1000'">
+                <div class="slide-text">You Are My Happiness ❤️</div>
             </div>
-            <div class="slide" data-title="Happy Birthday ❤️">
-                <img src="photo4.jpg" alt="Slide 4">
-                <div class="slide-content">
-                    <h2 class="slide-title">Happy Birthday ❤️</h2>
-                    
-                    <!-- Final Interactive Slide Elements (hidden until last slide) -->
-                    <div id="final-controls" class="hidden">
-                        <p style="margin-top: 20px; font-size: 1.2rem;">Tonight is all about you ❤️</p>
-                        <div class="interaction-panel">
-                            <button id="decorate-btn" class="btn-action">✨ Decorate</button>
-                            <button id="balloons-btn" class="btn-action">🎈 Add Balloons</button>
-                            <button id="cake-btn" class="btn-action">🎂 Show Cake</button>
-                        </div>
+            <div class="slide" data-index="3">
+                <img src="photo4.jpg" alt="Happy Birthday" onerror="this.src='https://picsum.photos/seed/love4/800/1000'">
+                <div class="slide-text">Happy Birthday ❤️</div>
+            </div>
+            <div class="slide black-screen" data-index="4">
+                <!-- Pure Black Transition -->
+            </div>
+        </div>
 
-                        <div id="cake-container">
-                            <div class="cake">
-                                <div class="frosting"></div>
-                                <div class="frosting-drip" style="left: 10px; height: 25px;"></div>
-                                <div class="frosting-drip" style="left: 40px; height: 35px;"></div>
-                                <div class="frosting-drip" style="left: 75px; height: 20px;"></div>
-                                <div class="frosting-drip" style="left: 110px; height: 30px;"></div>
-                                <div class="frosting-drip" style="left: 145px; height: 25px;"></div>
-                                <div class="cake-layer"></div>
-                            </div>
-                            <div class="candles-container">
-                                <div class="candle candle-1" id="candle-1"><div class="flame"></div></div>
-                                <div class="candle candle-2" id="candle-2"><div class="flame"></div></div>
-                                <div class="candle candle-3" id="candle-3"><div class="flame"></div></div>
-                            </div>
-                        </div>
+        <div class="slider-controls">
+            <button id="prev-btn">←</button>
+            <button id="next-btn">→</button>
+        </div>
+    </section>
 
-                        <div id="final-message"></div>
+    <!-- Final Interactive Slide -->
+    <section id="final-slide">
+        <div class="content">
+            <h2 id="final-title">Tonight is all about you ❤️</h2>
+            
+            <div id="interaction-buttons">
+                <button id="decorate-btn">✨ Decorate</button>
+                <button id="balloons-btn">🎈 Add Balloons</button>
+                <button id="cake-btn">🎂 Show Cake</button>
+                <button id="sprinkles-btn" class="hidden">🍭 Add Sprinkles</button>
+                <button id="frosting-btn" class="hidden">🍦 Add Frosting</button>
+                <button id="topper-btn" class="hidden">⭐ Add Topper</button>
+            </div>
+
+            <div id="cake-container" class="hidden">
+                <div class="cake">
+                    <div id="cake-topper" class="hidden">❤️</div>
+                    <div class="plate"></div>
+                    <div class="layer layer-bottom"></div>
+                    <div class="layer layer-middle"></div>
+                    <div class="layer layer-top"></div>
+                    <div class="icing"></div>
+                    <div class="drips"></div>
+                    <div class="candles">
+                        <div class="candle" id="candle-1"><div class="flame"></div></div>
+                        <div class="candle" id="candle-2"><div class="flame"></div></div>
+                        <div class="candle" id="candle-3"><div class="flame"></div></div>
                     </div>
                 </div>
             </div>
 
-            <button class="nav-btn prev-btn">❮</button>
-            <button class="nav-btn next-btn">❯</button>
+            <div id="final-message" class="hidden"></div>
         </div>
     </section>
+
+    <!-- Music Control -->
+    <button id="music-toggle" class="hidden">🎵</button>
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
 
     <script src="script.js"></script>
 </body>
