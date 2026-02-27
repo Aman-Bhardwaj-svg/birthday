@@ -20,8 +20,8 @@ const balloonsBtn = document.getElementById('balloons-btn');
 const cakeBtn = document.getElementById('cake-btn');
 const sprinklesBtn = document.getElementById('sprinkles-btn');
 const frostingBtn = document.getElementById('frosting-btn');
-const topperBtn = document.getElementById('topper-btn');
 const cakeContainer = document.getElementById('cake-container');
+const cakeInstruction = document.getElementById('cake-instruction');
 const finalMessage = document.getElementById('final-message');
 const heartsContainer = document.getElementById('hearts-container');
 
@@ -132,8 +132,28 @@ function createBalloon() {
     
     const knot = document.createElement('div');
     knot.className = 'balloon-knot';
-    knot.style.borderBottomColor = color;
+    knot.style.backgroundColor = color;
     balloon.appendChild(knot);
+
+    const tie = document.createElement('div');
+    tie.className = 'balloon-tie';
+    balloon.appendChild(tie);
+
+    // Wavy "snake-like" string
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 20 60");
+    svg.setAttribute("class", "balloon-string");
+    
+    const path = document.createElementNS(svgNS, "path");
+    // Wavy path: M(Move) Q(Quadratic Bezier) T(Smooth Quadratic Bezier)
+    path.setAttribute("d", "M10 0 Q 15 15 10 30 T 10 60");
+    path.setAttribute("stroke", "rgba(255, 255, 255, 0.5)");
+    path.setAttribute("stroke-width", "1.5");
+    path.setAttribute("fill", "none");
+    
+    svg.appendChild(path);
+    balloon.appendChild(svg);
 
     balloon.style.left = Math.random() * 100 + 'vw';
     balloon.style.setProperty('--duration', (Math.random() * 4 + 6) + 's');
@@ -144,10 +164,10 @@ function createBalloon() {
 
 cakeBtn.addEventListener('click', () => {
     cakeContainer.classList.remove('hidden');
+    cakeInstruction.classList.remove('hidden');
     cakeBtn.style.display = 'none';
     sprinklesBtn.classList.remove('hidden');
     frostingBtn.classList.remove('hidden');
-    topperBtn.classList.remove('hidden');
     
     // Show candles one by one
     const candles = document.querySelectorAll('.candle');
@@ -184,14 +204,6 @@ frostingBtn.addEventListener('click', () => {
     addFrosting();
     frostingBtn.style.display = 'none';
     triggerFireworks(2);
-});
-
-topperBtn.addEventListener('click', () => {
-    const topper = document.getElementById('cake-topper');
-    topper.classList.remove('hidden');
-    setTimeout(() => topper.classList.add('visible'), 10);
-    topperBtn.style.display = 'none';
-    triggerFireworks(3);
 });
 
 function addSprinkles() {
@@ -256,6 +268,7 @@ function blowCandle(e) {
         triggerFireworks(1);
 
         if (candlesBlown === totalCandles) {
+            cakeInstruction.classList.add('hidden');
             startFinalMoment();
         }
     }
@@ -301,48 +314,81 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 class Particle {
-    constructor(x, y, color) {
+    constructor(x, y, color, speedMultiplier = 1) {
         this.x = x;
         this.y = y;
         this.color = color;
+        const angle = Math.random() * Math.PI * 2;
+        const force = (Math.random() * 6 + 4) * speedMultiplier;
         this.velocity = {
-            x: (Math.random() - 0.5) * 8,
-            y: (Math.random() - 0.5) * 8
+            x: Math.cos(angle) * force,
+            y: Math.sin(angle) * force
         };
         this.alpha = 1;
-        this.friction = 0.95;
+        this.friction = 0.97;
+        this.gravity = 0.12;
+        this.size = Math.random() * 3 + 1;
+        this.life = 1.0;
+        this.decay = Math.random() * 0.015 + 0.01;
+        this.isSparkle = Math.random() > 0.8;
     }
     draw() {
         ctx.save();
-        ctx.globalAlpha = this.alpha;
+        // Anime style: very bright, glowing particles
+        let currentAlpha = this.alpha;
+        if (this.isSparkle) {
+            currentAlpha *= (Math.sin(Date.now() * 0.02) * 0.5 + 0.5);
+        }
+        ctx.globalAlpha = currentAlpha;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.color;
         ctx.fill();
         ctx.restore();
     }
     update() {
         this.velocity.x *= this.friction;
         this.velocity.y *= this.friction;
+        this.velocity.y += this.gravity;
         this.x += this.velocity.x;
         this.y += this.velocity.y;
-        this.alpha -= 0.01;
+        this.alpha -= this.decay;
     }
 }
 
 function triggerFireworks(count) {
     for (let i = 0; i < count; i++) {
         const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height * 0.5;
-        const color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        const y = Math.random() * canvas.height * 0.4;
+        const hue = Math.random() * 360;
+        const color = `hsl(${hue}, 100%, 70%)`;
+        
+        // Anime style: Layered explosion
+        // Inner ring
         for (let j = 0; j < 30; j++) {
-            particles.push(new Particle(x, y, color));
+            particles.push(new Particle(x, y, color, 0.6));
+        }
+        // Outer ring
+        for (let j = 0; j < 50; j++) {
+            particles.push(new Particle(x, y, color, 1.2));
+        }
+        
+        // Central flash
+        const flashColor = `hsla(${hue}, 100%, 90%, 0.8)`;
+        for (let j = 0; j < 5; j++) {
+            const p = new Particle(x, y, '#ffffff', 0.2);
+            p.size = 10;
+            p.decay = 0.1;
+            particles.push(p);
         }
     }
 }
 
 function animateFireworks() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    // Anime style: longer trails by reducing clear alpha
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     particles.forEach((p, i) => {
