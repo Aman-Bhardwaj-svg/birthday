@@ -126,13 +126,20 @@ balloonsBtn.addEventListener('click', () => {
 function createBalloon() {
     const balloon = document.createElement('div');
     balloon.className = 'balloon';
-    const colors = ['#ff4d6d', '#ff758f', '#ffb3c1', '#ffd700', '#87ceeb'];
-    balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    const colors = ['#ff4d6d', '#ff758f', '#ffb3c1', '#ffd700', '#87ceeb', '#9b5de5', '#00f5d4'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    balloon.style.backgroundColor = color;
+    
+    const knot = document.createElement('div');
+    knot.className = 'balloon-knot';
+    knot.style.borderBottomColor = color;
+    balloon.appendChild(knot);
+
     balloon.style.left = Math.random() * 100 + 'vw';
-    balloon.style.setProperty('--duration', (Math.random() * 4 + 5) + 's');
-    balloon.style.setProperty('--drift', (Math.random() * 100 - 50) + 'px');
+    balloon.style.setProperty('--duration', (Math.random() * 4 + 6) + 's');
+    balloon.style.setProperty('--drift', (Math.random() * 200 - 100) + 'px');
     document.body.appendChild(balloon);
-    setTimeout(() => balloon.remove(), 9000);
+    setTimeout(() => balloon.remove(), 11000);
 }
 
 cakeBtn.addEventListener('click', () => {
@@ -145,25 +152,25 @@ cakeBtn.addEventListener('click', () => {
     // Show candles one by one
     const candles = document.querySelectorAll('.candle');
     const candleColors = [
-        'linear-gradient(to bottom, #ffeb3b, #f44336)',
-        'linear-gradient(to bottom, #b3ffab, #12fff7)',
-        'linear-gradient(to bottom, #ff9a9e, #fecfef)',
-        'linear-gradient(to bottom, #a1c4fd, #c2e9fb)',
-        'linear-gradient(to bottom, #f6d365, #fda085)'
+        ['#ffeb3b', '#f44336'],
+        ['#b3ffab', '#12fff7'],
+        ['#ff9a9e', '#fecfef'],
+        ['#a1c4fd', '#c2e9fb'],
+        ['#f6d365', '#fda085']
     ];
 
     candles.forEach((candle, i) => {
-        // Unique height and color for each candle
-        const randomHeight = Math.floor(Math.random() * 15) + 25; // 25px to 40px
-        const randomColor = candleColors[Math.floor(Math.random() * candleColors.length)];
+        // Unique height and striped color for each candle
+        const randomHeight = Math.floor(Math.random() * 15) + 35; // 35px to 50px
+        const colorPair = candleColors[Math.floor(Math.random() * candleColors.length)];
         
         candle.style.height = randomHeight + 'px';
-        candle.style.background = randomColor;
+        candle.style.background = `repeating-linear-gradient(45deg, ${colorPair[0]}, ${colorPair[0]} 5px, ${colorPair[1]} 5px, ${colorPair[1]} 10px)`;
 
         setTimeout(() => {
             candle.classList.add('visible');
             candle.addEventListener('click', blowCandle, { once: true });
-        }, (i + 1) * 800);
+        }, (i + 1) * 600);
     });
 });
 
