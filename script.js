@@ -1,123 +1,262 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Sparkles, Cake, ChevronLeft, ChevronRight, Volume2, VolumeX, PartyPopper } from 'lucide-react';
+document.addEventListener('DOMContentLoaded', () => {
+    // Elements
+    const introScreen = document.getElementById('intro-screen');
+    const storyScreen = document.getElementById('story-screen');
+    const startBtn = document.getElementById('start-btn');
+    const musicToggle = document.getElementById('music-toggle');
+    const musicIcon = document.getElementById('music-icon');
+    const bgMusic = document.getElementById('bg-music');
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
 
-// --- Magical Components ---
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    const finalControls = document.getElementById('final-controls');
+    
+    const decorateBtn = document.getElementById('decorate-btn');
+    const balloonsBtn = document.getElementById('balloons-btn');
+    const cakeBtn = document.getElementById('cake-btn');
+    const cakeContainer = document.getElementById('cake-container');
+    const candles = document.querySelectorAll('.candle');
+    const finalMessage = document.getElementById('final-message');
 
-const FloatingHearts = ({ intense = false }) => (
-  <div className="fixed inset-0 pointer-events-none z-10 overflow-hidden">
-    {[...Array(intense ? 40 : 15)].map((_, i) => (
-      <motion.div
-        key={i}
-        className="absolute text-pink-400/40"
-        initial={{ x: Math.random() * 100 + '%', y: '110%', rotate: 0 }}
-        animate={{ y: '-10%', rotate: 360, opacity: [0, 0.6, 0] }}
-        transition={{ duration: Math.random() * 8 + 7, repeat: Infinity, ease: "easeInOut", delay: Math.random() * 5 }}
-      >
-        <Heart size={Math.random() * 20 + 10} fill="currentColor" />
-      </motion.div>
-    ))}
-  </div>
-);
+    let currentSlide = 0;
+    let musicPlaying = false;
+    let candlesBlown = 0;
 
-// --- Main Application ---
+    // Canvas Setup
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-export default function App() {
-  const [step, setStep] = useState<'intro' | 'slides' | 'final'>('intro');
-  const [slideIndex, setSlideIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
-  const [showCake, setShowCake] = useState(false);
-  const [candlesBlown, setCandlesBlown] = useState([false, false, false]);
-  const [allCandlesBlown, setAllCandlesBlown] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+    // --- 1. Intro Screen Logic ---
+    startBtn.addEventListener('click', () => {
+        introScreen.classList.add('hidden');
+        storyScreen.classList.remove('hidden');
+        playMusic();
+        startBackgroundAnimations();
+    });
 
-  const slides = [
-    { image: 'photo1.jpg', title: 'How It Started 💫' },
-    { image: 'photo2.jpg', title: 'Beautiful Moments 🌸' },
-    { image: 'photo3.jpg', title: 'You Are My Happiness ❤️' },
-    { image: 'photo4.jpg', title: 'Happy Birthday ❤️' },
-  ];
+    // --- 8. Music Logic ---
+    function playMusic() {
+        bgMusic.play().then(() => {
+            musicPlaying = true;
+            musicIcon.textContent = '🎵';
+        }).catch(err => console.log("Autoplay blocked or file missing"));
+    }
 
-  const handleStart = () => {
-    setStep('slides');
-    audioRef.current?.play().catch(() => {});
-  };
+    musicToggle.addEventListener('click', () => {
+        if (musicPlaying) {
+            bgMusic.pause();
+            musicIcon.textContent = '🔇';
+        } else {
+            bgMusic.play();
+            musicIcon.textContent = '🎵';
+        }
+        musicPlaying = !musicPlaying;
+    });
 
-  const handleBlowCandle = (i: number) => {
-    if (candlesBlown[i]) return;
-    const newBlown = [...candlesBlown];
-    newBlown[i] = true;
-    setCandlesBlown(newBlown);
-    if (newBlown.every(b => b)) setTimeout(() => setAllCandlesBlown(true), 1000);
-  };
+    // --- 2. Slider Logic ---
+    function updateSlides() {
+        slides.forEach((slide, index) => {
+            slide.classList.toggle('active', index === currentSlide);
+        });
 
-  return (
-    <div className="min-h-screen bg-black text-white overflow-hidden selection:bg-pink-500">
-      <audio ref={audioRef} src="music.mp3" loop />
-      <div className="fixed inset-0 bg-gradient-to-br from-rose-950 via-black to-indigo-950 z-[-1]" />
-      <FloatingHearts intense={allCandlesBlown} />
+        // Show final controls only on the last slide
+        if (currentSlide === slides.length - 1) {
+            finalControls.classList.remove('hidden');
+        } else {
+            finalControls.classList.add('hidden');
+        }
+    }
 
-      <AnimatePresence mode="wait">
-        {step === 'intro' && (
-          <motion.div key="intro" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-screen flex flex-col items-center justify-center text-center px-6">
-            <h1 className="text-3xl md:text-6xl font-light mb-8 text-transparent bg-clip-text bg-gradient-to-r from-rose-200 to-pink-400">
-              Tonight is not just a night ✨
-            </h1>
-            <button onClick={handleStart} className="px-10 py-4 rounded-full bg-rose-500 text-white font-medium text-lg shadow-xl">
-              Tap to Begin 💖
-            </button>
-          </motion.div>
-        )}
+    nextBtn.addEventListener('click', () => {
+        currentSlide = (currentSlide + 1) % slides.length;
+        updateSlides();
+    });
 
-        {step === 'slides' && (
-          <motion.div key="slides" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-screen w-full relative">
-            <img src={slides[slideIndex].image} className="w-full h-full object-cover opacity-50" />
-            <div className="absolute inset-0 flex items-center justify-center text-center p-8">
-              <h2 className="text-4xl md:text-7xl font-serif italic">{slides[slideIndex].title}</h2>
-            </div>
-            <div className="absolute bottom-12 w-full flex justify-center gap-8">
-              <button onClick={() => slideIndex > 0 ? setSlideIndex(slideIndex - 1) : setStep('intro')} className="p-4 rounded-full bg-white/10"><ChevronLeft size={32}/></button>
-              <button onClick={() => slideIndex < slides.length - 1 ? setSlideIndex(slideIndex + 1) : setStep('final')} className="p-4 rounded-full bg-white/10"><ChevronRight size={32}/></button>
-            </div>
-          </motion.div>
-        )}
+    prevBtn.addEventListener('click', () => {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        updateSlides();
+    });
 
-        {step === 'final' && (
-          <motion.div key="final" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-screen flex flex-col items-center justify-center px-6">
-            {!allCandlesBlown ? (
-              <div className="flex flex-col items-center">
-                <h2 className="text-3xl md:text-5xl mb-12 text-rose-200">Tonight is all about you ❤️</h2>
-                <button onClick={() => setShowCake(true)} className="px-8 py-3 rounded-full bg-amber-500 text-white flex items-center gap-2 mb-12">
-                  <Cake size={20} /> Show Cake
-                </button>
-                {showCake && (
-                  <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative flex flex-col items-center">
-                    {/* Enhanced Cake UI */}
-                    <div className="w-48 h-24 bg-rose-100 rounded-t-3xl relative shadow-2xl z-10">
-                      <div className="absolute top-0 left-0 right-0 h-6 bg-rose-200 rounded-t-3xl" />
-                      <div className="absolute -top-12 left-0 right-0 flex justify-center gap-8">
-                        {candlesBlown.map((blown, i) => (
-                          <div key={i} onClick={() => handleBlowCandle(i)} className="relative cursor-pointer">
-                            <div className="w-3 h-12 bg-indigo-400 rounded-full" />
-                            {!blown && <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity }} className="absolute -top-6 left-1/2 -translate-x-1/2 w-4 h-8 bg-orange-500 rounded-full shadow-[0_0_15px_orange]" />}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="w-64 h-4 bg-white/20 rounded-full mt-2" />
-                  </motion.div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center max-w-2xl">
-                <h1 className="text-4xl md:text-6xl font-serif italic text-rose-300 mb-6">Happy Birthday ❤️</h1>
-                <p className="text-xl font-light">May your life be filled with love, dreams and magic ✨</p>
-                <button onClick={() => window.location.reload()} className="mt-12 px-8 py-3 rounded-full border border-white/20 text-white/50">Replay</button>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+    // --- 3. Background Animations (Hearts & Particles) ---
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.innerHTML = '❤️';
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+        heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 5000);
+    }
+
+    function startBackgroundAnimations() {
+        setInterval(createHeart, 800);
+        animateParticles();
+    }
+
+    // --- 5. Button Interactions ---
+    decorateBtn.addEventListener('click', () => {
+        // More hearts
+        for(let i=0; i<15; i++) {
+            setTimeout(createHeart, i * 100);
+        }
+        // Burst fireworks
+        createFireworkBurst();
+        // Sparkle effect (handled by canvas or simple divs)
+        showSparkles();
+    });
+
+    balloonsBtn.addEventListener('click', () => {
+        for(let i=0; i<10; i++) {
+            setTimeout(createBalloon, i * 200);
+        }
+    });
+
+    function createBalloon() {
+        const balloon = document.createElement('div');
+        balloon.className = 'balloon';
+        const colors = ['#ff75a0', '#ffafbd', '#ffd700', '#ffffff', '#ff4b82'];
+        balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        balloon.style.left = Math.random() * 100 + 'vw';
+        balloon.style.animationDuration = (Math.random() * 4 + 4) + 's';
+        document.body.appendChild(balloon);
+        setTimeout(() => balloon.remove(), 8000);
+    }
+
+    cakeBtn.addEventListener('click', () => {
+        cakeContainer.style.display = 'block';
+        
+        // Add dynamic sprinkles
+        const cake = document.querySelector('.cake');
+        const sprinkleColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff'];
+        
+        for (let i = 0; i < 40; i++) {
+            setTimeout(() => {
+                const sprinkle = document.createElement('div');
+                sprinkle.className = 'sprinkle';
+                sprinkle.style.backgroundColor = sprinkleColors[Math.floor(Math.random() * sprinkleColors.length)];
+                sprinkle.style.left = Math.random() * 100 + '%';
+                sprinkle.style.top = Math.random() * 100 + '%';
+                sprinkle.style.transform = `rotate(${Math.random() * 360}deg)`;
+                cake.appendChild(sprinkle);
+            }, i * 20);
+        }
+
+        // Show candles one by one with varied pop-up animations
+        candles.forEach((candle, index) => {
+            setTimeout(() => {
+                candle.classList.add(`pop-up-${index + 1}`);
+            }, 1500 + (index * 450));
+        });
+    });
+
+    // --- 6. Candle Interaction ---
+    candles.forEach(candle => {
+        candle.addEventListener('click', function() {
+            const flame = this.querySelector('.flame');
+            if (flame && flame.style.display !== 'none') {
+                flame.style.display = 'none';
+                
+                // Smoke animation
+                const smoke = document.createElement('div');
+                smoke.className = 'smoke';
+                this.appendChild(smoke);
+                
+                // Trigger firework
+                createFireworkBurst();
+                
+                candlesBlown++;
+                if (candlesBlown === candles.length) {
+                    startFinalMoment();
+                }
+            }
+        });
+    });
+
+    // --- 7. Final Moment ---
+    function startFinalMoment() {
+        // Typing animation
+        const text = "Happy Birthday ❤️\nMay your life be filled with love, dreams and magic ✨";
+        let i = 0;
+        finalMessage.innerHTML = "";
+        
+        function type() {
+            if (i < text.length) {
+                finalMessage.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+                i++;
+                setTimeout(type, 100);
+            } else {
+                // Big celebration
+                setInterval(createFireworkBurst, 1000);
+                document.body.style.background = 'radial-gradient(circle, #ff4b82, #000)';
+            }
+        }
+        
+        setTimeout(type, 1000);
+    }
+
+    // --- Canvas Fireworks & Particles ---
+    let particles = [];
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Update and draw particles
+        particles.forEach((p, index) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.05; // gravity
+            p.alpha -= 0.01;
+            
+            if (p.alpha <= 0) {
+                particles.splice(index, 1);
+            } else {
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+        
+        requestAnimationFrame(animateParticles);
+    }
+
+    function createFireworkBurst() {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * (canvas.height / 2);
+        const color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+        
+        for (let i = 0; i < 50; i++) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                size: Math.random() * 3 + 1,
+                color: color,
+                alpha: 1
+            });
+        }
+    }
+
+    function showSparkles() {
+        for (let i = 0; i < 20; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                size: Math.random() * 2,
+                color: '#fff',
+                alpha: 1
+            });
+        }
+    }
+});
