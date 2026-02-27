@@ -207,46 +207,72 @@ button:hover {
     display: none !important;
 }
 
+#cake-instruction {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    color: #ffd700;
+    font-style: italic;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
 /* Cake Animation */
 #cake-container {
-    margin-top: 3rem;
+    margin-top: 4rem;
     position: relative;
-    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes popIn {
-    from { transform: scale(0); }
-    to { transform: scale(1); }
+    from { transform: scale(0) rotate(-10deg); opacity: 0; }
+    to { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 .cake {
     position: relative;
-    width: 150px;
-    height: 120px;
+    width: 200px;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.plate {
+    position: absolute;
+    bottom: -10px;
+    width: 240px;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 50%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1;
 }
 
 .layer {
     position: absolute;
     width: 100%;
-    border-radius: 10px 10px 0 0;
+    border-radius: 15px 15px 5px 5px;
+    box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1);
 }
 
-.layer-bottom { height: 40px; bottom: 0; background: #6d4c41; }
-.layer-middle { height: 35px; bottom: 40px; background: #8d6e63; width: 90%; left: 5%; }
-.layer-top { height: 30px; bottom: 75px; background: #a1887f; width: 80%; left: 10%; }
+.layer-bottom { height: 50px; bottom: 0; background: #6d4c41; width: 180px; z-index: 2; }
+.layer-middle { height: 45px; bottom: 45px; background: #8d6e63; width: 150px; z-index: 3; }
+.layer-top { height: 40px; bottom: 85px; background: #a1887f; width: 120px; z-index: 4; }
 
 .icing {
     position: absolute;
-    top: 15px;
-    left: 10%;
-    width: 80%;
-    height: 10px;
-    background: #fce4ec;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: visible;
+    top: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 125px;
+    height: 15px;
+    background: #fff0f5;
+    border-radius: 20px;
+    z-index: 5;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .cake-message {
@@ -300,60 +326,61 @@ button:hover {
     transform: translateY(0);
 }
 
-#cake-topper {
-    position: absolute;
-    top: -45px;
-    left: 50%;
-    transform: translateX(-50%) scale(0);
-    font-size: 30px;
-    color: #ff4d6d;
-    text-shadow: 0 0 10px rgba(255, 77, 109, 0.5);
-    z-index: 10;
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-#cake-topper.visible {
-    transform: translateX(-50%) scale(1);
-}
-
 .candles {
     position: absolute;
-    top: -10px;
+    top: 25px; /* Positioned on top of the top layer */
     left: 0;
     width: 100%;
     display: flex;
     justify-content: center;
+    align-items: flex-end;
     gap: 15px;
+    z-index: 6;
 }
 
 .candle {
-    width: 8px;
-    height: 30px;
-    background: linear-gradient(to bottom, #ffeb3b, #f44336);
+    width: 10px;
+    height: 35px;
+    border-radius: 3px 3px 0 0;
     position: relative;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.5s ease, transform 0.3s ease;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+.candle::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 6px;
+    background: #333;
 }
 
 .candle.visible { opacity: 1; }
+.candle:hover { transform: scale(1.1); }
 
 .flame {
     position: absolute;
-    top: -12px;
+    top: -18px;
     left: 50%;
     transform: translateX(-50%);
-    width: 10px;
-    height: 15px;
-    background: #ff9800;
+    width: 12px;
+    height: 20px;
+    background: radial-gradient(circle at 50% 80%, #fff 0%, #fffb00 30%, #ff9800 60%, #ff4500 100%);
     border-radius: 50% 50% 20% 20%;
-    box-shadow: 0 0 10px #ff9800;
-    animation: flicker 0.1s infinite alternate;
+    box-shadow: 0 0 15px #ff9800, 0 0 30px rgba(255, 152, 0, 0.5);
+    animation: flameMove 0.6s infinite ease-in-out alternate;
+    filter: blur(0.5px);
 }
 
-@keyframes flicker {
-    from { transform: translateX(-50%) scale(1); }
-    to { transform: translateX(-50%) scale(1.1); }
+@keyframes flameMove {
+    0% { transform: translateX(-50%) scale(1) rotate(-2deg); }
+    50% { transform: translateX(-50%) scale(1.1) rotate(2deg); }
+    100% { transform: translateX(-50%) scale(1) rotate(-1deg); }
 }
 
 /* Smoke Animation */
@@ -428,26 +455,67 @@ button:hover {
 /* Balloons */
 .balloon {
     position: absolute;
-    width: 40px;
-    height: 50px;
-    border-radius: 50%;
-    bottom: -60px;
-    animation: balloonUp var(--duration) ease-in forwards;
+    width: 50px;
+    height: 65px;
+    border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+    bottom: -100px;
+    animation: balloonUp var(--duration) ease-in forwards, balloonSway 3s infinite ease-in-out;
+    box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
 }
 
-.balloon::after {
+.balloon::before {
     content: '';
     position: absolute;
-    bottom: -10px;
+    top: 15%;
+    left: 20%;
+    width: 10px;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transform: rotate(20deg);
+}
+
+.balloon-string {
+    position: absolute;
+    bottom: -60px;
     left: 50%;
-    width: 2px;
-    height: 20px;
-    background: rgba(255, 255, 255, 0.3);
+    transform: translateX(-50%);
+    width: 15px;
+    height: 60px;
+    pointer-events: none;
+}
+
+.balloon-knot {
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 8px;
+    background: inherit;
+    clip-path: polygon(0% 100%, 100% 100%, 50% 0%);
+    opacity: 0.9;
+}
+
+.balloon-tie {
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
 }
 
 @keyframes balloonUp {
     0% { transform: translateY(0) translateX(0); }
-    100% { transform: translateY(-110vh) translateX(var(--drift)); }
+    100% { transform: translateY(-120vh) translateX(var(--drift)); }
+}
+
+@keyframes balloonSway {
+    0%, 100% { margin-left: 0; }
+    50% { margin-left: 15px; }
 }
 
 /* Animations */
